@@ -31,7 +31,6 @@ async function run() {
     app.post("/user", async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
-      console.log("user in db");
       res.json(result);
     });
     // Make Admin
@@ -57,14 +56,12 @@ async function run() {
     app.get("/products", async (req, res) => {
       const cursor = productCollection.find({});
       const products = await cursor.toArray();
-      console.log(products.length);
       res.json(products);
     });
     // get product for home
     app.get("/home/products", async (req, res) => {
       const cursor = productCollection.find({});
       const products = await cursor.limit(6).toArray();
-      console.log(products.length);
       res.json(products);
     });
     // get product by id
@@ -92,6 +89,31 @@ async function run() {
       res.json(result);
     });
 
+    // get order
+    app.post("/orders", async (req, res) => {
+      const cursor = orderCollection.find({});
+      const orders = await cursor.toArray();
+      res.json(orders);
+    });
+
+    // update order Status
+    app.put("order/status/:id", async (req, res) => {
+      const updateOrderId = req.params.id;
+      const filter = { _id: ObjectId(updateOrderId) };
+      const updatedDoc = { $set: { status: "shipped" } };
+      const result = await orderCollection.updateOne(filter, updatedDoc);
+      console.log(result);
+      res.json(result);
+    });
+
+    // delete order
+    app.delete("/orders/:id", async (req, res) => {
+      const orderId = req.params.id;
+      const query = { _id: ObjectId(orderId) };
+      const result = await orderCollection.deleteOne(query);
+      res.json(result);
+    });
+
     // Post Review
     app.post("/review", async (req, res) => {
       const review = req.body;
@@ -103,6 +125,22 @@ async function run() {
       const cursor = reviewCollection.find({});
       const reviews = await cursor.toArray();
       res.json(reviews);
+    });
+
+    app.get("/my-orders/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const cursor = orderCollection.find(query);
+      const myOrders = await cursor.toArray();
+      res.json(myOrders);
+    });
+
+    app.delete("/my-order/:orderId", async (req, res) => {
+      const deleteId = req.params.orderId;
+      const query = { _id: ObjectId(deleteId) };
+      const result = await orderCollection.deleteOne(query);
+      console.log(result);
+      res.json(result);
     });
 
     // above this
