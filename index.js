@@ -9,6 +9,7 @@ const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+const ObjectId = require("mongodb").ObjectId;
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@janaalam.ewacz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
@@ -23,6 +24,8 @@ async function run() {
     const database = client.db("scooty_shop");
     const userCollection = database.collection("users");
     const productCollection = database.collection("products");
+    const orderCollection = database.collection("orders");
+    const reviewCollection = database.collection("reviews");
 
     // USER POST
     app.post("/user", async (req, res) => {
@@ -57,6 +60,20 @@ async function run() {
       console.log(products.length);
       res.json(products);
     });
+    // get product for home
+    app.get("/home/products", async (req, res) => {
+      const cursor = productCollection.find({});
+      const products = await cursor.limit(6).toArray();
+      console.log(products.length);
+      res.json(products);
+    });
+    // get product by id
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productCollection.findOne(query);
+      res.json(result);
+    });
 
     // Add Product POST
     app.post("/product", async (req, res) => {
@@ -66,6 +83,29 @@ async function run() {
       console.log(result);
       res.json(result);
     });
+
+    // Order POST
+    app.post("/order", async (req, res) => {
+      const order = req.body;
+      order.status = "pending";
+      const result = await orderCollection.insertOne(order);
+      res.json(result);
+    });
+
+    // Post Review
+    app.post("/review", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.json(result);
+    });
+    // get reviews
+    app.get("/reviews", async (req, res) => {
+      const cursor = reviewCollection.find({});
+      const reviews = await cursor.toArray();
+      res.json(reviews);
+    });
+
+    // above this
   } finally {
     // await client.connect();
   }
