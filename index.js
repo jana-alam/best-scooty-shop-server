@@ -152,7 +152,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.json({ message: "Server Running" });
+  res.json({ message: "Server Running & repo changed" });
 });
 
 app.listen(port, () => {
