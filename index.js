@@ -80,6 +80,13 @@ async function run() {
       console.log(result);
       res.json(result);
     });
+    // delete products
+    app.delete("/orders/:id", async (req, res) => {
+      const orderId = req.params.id;
+      const query = { _id: ObjectId(orderId) };
+      const result = await productCollection.deleteOne(query);
+      res.json(result);
+    });
 
     // Order POST
     app.post("/order", async (req, res) => {
